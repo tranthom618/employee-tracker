@@ -8,7 +8,6 @@ const db = mysql.createConnection(
     host: 'localhost',
     // MySQL username,
     user: 'root',
-    // TODO: Add MySQL password here
     password: 'Uranus1123!',
     database: 'employees_db'
   },
@@ -22,6 +21,12 @@ const viewEmployees = async () => {
   appMenu();
 }
 
+const viewDepartments = async () => {
+  const results = await db.promise().query("INSERT INTO * FROM EMPLOYEE;")
+  console.table(results[0]);
+  console.log("\n");
+  appMenu();
+}
 
 const appMenu = async () => {
   const results = await inquirer.prompt([
