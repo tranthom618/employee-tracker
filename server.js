@@ -15,19 +15,27 @@ const db = mysql.createConnection(
 );
 
 const viewEmployees = async () => {
-  const results = await db.promise().query("SELECT * FROM EMPLOYEE;")
+  const results = await db.promise().query("SELECT * FROM employee;")
   console.table(results[0]);
   console.log("\n");
   appMenu();
 }
 
 const viewDepartments = async () => {
-  const results = await db.promise().query("INSERT INTO * FROM EMPLOYEE;")
+  const results = await db.promise().query("SELECT * FROM department;")
   console.table(results[0]);
   console.log("\n");
   appMenu();
 }
 
+const viewRoles = async () => {
+  const results = await db.promise().query("SELECT * FROM role;")
+  console.table(results[0]);
+  console.log("\n");
+  appMenu();
+}
+
+// INSERT INTO * FROM EMPLOYEE;
 const appMenu = async () => {
   const results = await inquirer.prompt([
     { type: "list",
@@ -37,7 +45,13 @@ const appMenu = async () => {
     }
   ])
   if (results.appMenu === 'View All Employees') {
-    viewEmployees()
+    viewEmployees();
+  }
+  else if (results.appMenu === 'View All Departments') {
+    viewDepartments();
+  }
+  else if (results.appMenu === 'View All Roles') {
+    viewRoles();
   }
 }
 
