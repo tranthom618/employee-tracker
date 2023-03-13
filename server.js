@@ -8,6 +8,7 @@ const db = mysql.createConnection(
     host: 'localhost',
     // MySQL username,
     user: 'root',
+    ////////// USE YOUR OWN MYSQL PASSWORD HERE //////////
     password: 'Uranus1123!',
     database: 'employees_db'
   },
@@ -202,7 +203,7 @@ const updateEmployeeList = async () => {
 // Function that is being called from main menu inquirer when "Update Employee" is selected
 const updateEmployee = async () => {
 
-  // Additional Inquirer Prompt to receive user input for new employee's info
+  // Additional Inquirer Prompt to receive user input to select and update an employee's info
   const infoUpdateEmployee = await inquirer.prompt([
     { type: "list",
     name: "updateEmployeeChoice",
@@ -216,7 +217,7 @@ const updateEmployee = async () => {
     },
   ])
 
-  // Inserts new employee information to employee table
+  // Inserts updated employee information to employee table
   const employeeUpdated = await db.promise().query("UPDATE employee SET role_id=" + 
   `${infoUpdateEmployee.updateRoleChoice}` + " WHERE id="+`${infoUpdateEmployee.updateEmployeeChoice}` + ";")
   
