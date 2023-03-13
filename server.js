@@ -47,9 +47,36 @@ const viewRoles = async () => {
   appMenu();
 }
 
+///// SECTION FOR ALL FUNCTIONS FOR ADDING NEW DEPARTMENT /////
+
+const addDepartment = async () => {
+
+  // Additional Inquirer Prompt to receive user input for new department's info
+  const infoDep = await inquirer.prompt([
+    { type: "input",
+      name: "addDepName",
+      message: "What is the name of the new department?",
+    },
+  ])
+
+  // Inserts new department information to department table
+  const newDepartment = await db.promise().query(`INSERT INTO department (name) VALUES ('${infoDep.addDepName}')`)
+  
+  // Selects the newly updated table
+  const results = await db.promise().query("SELECT * FROM department;");
+
+  // Prints the newly updated table
+  console.log("\nNewly Updated Department Table: ");
+  console.table(results[0]);
+  console.log("\n");
+
+  // Recalls the appMenu so the user can make another new selection
+  appMenu();
+}
+
 ///// SECTION FOR ALL FUNCTIONS FOR ADDING NEW ROLE /////
 
-// Used to retrieve from db all the current employees that can be assigned as a manager to the new employee
+// Used to retrieve from db all the departments that can be assigned for the new role
 const depChoices = async () => {
   const depQuery = await db.promise().query("SELECT id AS value, name FROM department;");
   console.log("\nDEPARTMENT ID REFERENCE TABLE:\n")
@@ -60,7 +87,7 @@ const depChoices = async () => {
 
 const addRole = async () => {
 
-  // Additional Inquirer Prompt to receive user input for new employee's info
+  // Additional Inquirer Prompt to receive user input for new role info
   const infoRole = await inquirer.prompt([
     { type: "input",
       name: "addRoleName",
@@ -72,18 +99,19 @@ const addRole = async () => {
     },
     { type: "list",
     name: "addRoleDep",
-    message: "Which department does the new role belong to?",
+    message: "Which department does the new role belong to? (Reference 'Department ID' Table above)",
     choices: await depChoices(),
     },
   ])
 
-  // Inserts new employee information to employee table
+  // Inserts new role information to role table
   const newRole = await db.promise().query(`INSERT INTO role (title, salary, department_id) VALUES ('${infoRole.addRoleName}', '${infoRole.addRoleSalary}', '${infoRole.addRoleDep}')`)
   
   // Selects the newly updated table
   const results = await db.promise().query("SELECT * FROM role;");
 
   // Prints the newly updated table
+  console.log("\nNewly Updated Role Table: ");
   console.table(results[0]);
   console.log("\n");
 
@@ -124,12 +152,12 @@ const addEmployee = async () => {
     },
     { type: "list",
     name: "addEmpRole",
-    message: "What is the employee's role ID? (Reference table above for ID)",
+    message: "What is the employee's role ID? (Reference 'Role ID' table above for ID)",
     choices: await roleChoices(),
     },
     { type: "list",
     name: "addEmpManager",
-    message: "Who is the employee's manager? (USE MANAGER ID - Reference table above for ID)",
+    message: "Who is the employee's manager? (USE MANAGER ID - Reference 'Manager ID' table above for ID)",
     choices: await managerChoices(),
     },
   ])
@@ -141,6 +169,7 @@ const addEmployee = async () => {
   const results = await db.promise().query("SELECT * FROM employee;");
 
   // Prints the newly updated table
+  console.log("\nNewly Updated Employee Table: ");
   console.table(results[0]);
   console.log("\n");
 
@@ -162,7 +191,7 @@ const appMenu = async () => {
     }
   ])
 
-  // If + If Else Statements to verify the choices above and calls the respective functions.
+  // If Statements to verify the choices above and calls the respective functions.
   if (results.appMenu === 'View All Employees') {
     viewEmployees();
   }
@@ -178,7 +207,9 @@ const appMenu = async () => {
   else if (results.appMenu === 'Add Role') {
     addRole();
   }
-
+  else if (results.appMenu === 'Add Department') {
+    addDepartment();
+  }
   else if (results.appMenu === 'Quit') {
     console.log("\n\n\nGoodbye!\n\nYou may now close the terminal or press CTRL+C then Y to exit.");
   }
