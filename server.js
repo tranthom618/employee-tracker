@@ -21,21 +21,55 @@ const viewEmployees = async () => {
   appMenu();
 }
 
-const viewDepartments = async () => {
-  const results = await db.promise().query("SELECT * FROM department;")
-  console.table(results[0]);
-  console.log("\n");
-  appMenu();
-}
+// const viewDepartments = async () => {
+//   const results = await db.promise().query("SELECT * FROM department;")
+//   console.table(results[0]);
+//   console.log("\n");
+//   appMenu();
+// }
 
-const viewRoles = async () => {
-  const results = await db.promise().query("SELECT * FROM role;")
-  console.table(results[0]);
-  console.log("\n");
-  appMenu();
-}
+// const viewRoles = async () => {
+//   const results = await db.promise().query("SELECT * FROM role;")
+//   console.table(results[0]);
+//   console.log("\n");
+//   appMenu();
+// }
 
-// INSERT INTO * FROM EMPLOYEE;
+// const addEmployee = async () => {
+//   const infoEmployee = await inquirer.prompt([
+//     { type: "input",
+//       name: "addFirstName",
+//       message: "What's the employee's first name?",
+//     },
+//     { type: "input",
+//     name: "addLastName",
+//     message: "What's the employee's last name?",
+//     },
+//     { type: "list",
+//     name: "addEmpRole",
+//     message: "What's the employee's role?",
+//     },
+//     { type: "list",
+//     name: "addEmpManager",
+//     message: "Who is the employee's manager?",
+//     },
+//   ])
+
+
+//   // Inserts new employee information to employee table
+//   const newEmployee = await db.promise().query(`INSERT INTO employee (first_name, last_name, role_id, manager_id) VALUES (${addFirstName}, ${addLastName}, ${addEmpRole}, ${addEmpManager})`)
+  
+//   // Selects the newly updated table
+//   const results = await db.promise().query("SELECT * FROM employee;");
+
+//   // Prints the newly updated table
+//   console.table(results[0]);
+//   console.log("\n");
+
+//   // Recalls the appMenu so the user can make another or new selection
+//   appMenu();
+// }
+
 const appMenu = async () => {
   const results = await inquirer.prompt([
     { type: "list",
@@ -53,6 +87,10 @@ const appMenu = async () => {
   else if (results.appMenu === 'View All Roles') {
     viewRoles();
   }
+
+  // else if (results.appMenu === 'Quit') {
+  //   return quit();
+  // }
 }
 
 appMenu();
