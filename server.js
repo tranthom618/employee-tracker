@@ -14,6 +14,8 @@ const db = mysql.createConnection(
   console.log(`Connected to the employees_db database.`)
 );
 
+
+
 ///// View All Employees /////
 const viewEmployees = async () => {
   // Retrieves data from employee table
@@ -47,8 +49,11 @@ const viewRoles = async () => {
   appMenu();
 }
 
-///// SECTION FOR ALL FUNCTIONS FOR ADDING NEW DEPARTMENT /////
 
+
+///// SECTION FOR ADDING NEW DEPARTMENT /////
+
+// Function that is being called from main menu inquirer when "Add Department" is selected
 const addDepartment = async () => {
 
   // Additional Inquirer Prompt to receive user input for new department's info
@@ -74,17 +79,18 @@ const addDepartment = async () => {
   appMenu();
 }
 
+
+
 ///// SECTION FOR ALL FUNCTIONS FOR ADDING NEW ROLE /////
 
 // Used to retrieve from db all the departments that can be assigned for the new role
 const depChoices = async () => {
   const depQuery = await db.promise().query("SELECT id AS value, name FROM department;");
-  console.log("\nDEPARTMENT ID REFERENCE TABLE:\n")
-  console.log(depQuery[0]);
-  console.log("\nREFERENCE DEPARTMENT ID FROM TABLES ABOVE\n");
+  console.table(depQuery[0]);
   return depQuery[0];
 }
 
+// Function that is being called from main menu inquirer when "Add Role" is selected
 const addRole = async () => {
 
   // Additional Inquirer Prompt to receive user input for new role info
@@ -99,7 +105,7 @@ const addRole = async () => {
     },
     { type: "list",
     name: "addRoleDep",
-    message: "Which department does the new role belong to? (Reference 'Department ID' Table above)",
+    message: "Which department does the new role belong to?",
     choices: await depChoices(),
     },
   ])
@@ -119,13 +125,16 @@ const addRole = async () => {
   appMenu();
 }
 
+
+
 ///// SECTION FOR ALL FUNCTIONS FOR ADDING NEW EMPLOYEE /////
 
 // Used to retrieve from db all the roles that can be assigned to a new employee
+// Will also be used to list role choices for updating an employee
 const roleChoices = async () => {
   const roleQuery = await db.promise().query("SELECT id AS value, title FROM role;");
   console.log("\nROLE ID REFERENCE TABLE:\n");
-  console.log(roleQuery[0]);
+  console.table(roleQuery[0]);
   return roleQuery[0];
 }
 
@@ -133,11 +142,12 @@ const roleChoices = async () => {
 const managerChoices = async () => {
   const managerQuery = await db.promise().query("SELECT id AS value, first_name, last_name FROM employee;");
   console.log("\nMANAGER ID REFERENCE TABLE:\n")
-  console.log(managerQuery[0]);
+  console.table(managerQuery[0]);
   console.log("\nREFERENCE ROLE ID AND MANAGER ID FROM TABLES ABOVE\n");
   return managerQuery[0];
 }
 
+// Function that is being called from main menu inquirer when "Add Employee" is selected
 const addEmployee = async () => {
 
   // Additional Inquirer Prompt to receive user input for new employee's info
@@ -152,18 +162,63 @@ const addEmployee = async () => {
     },
     { type: "list",
     name: "addEmpRole",
-    message: "What is the employee's role ID? (Reference 'Role ID' table above for ID)",
+    message: "What is the employee's role ID? (Reference 'Role ID' table above, use 'value' for role ID)",
     choices: await roleChoices(),
     },
     { type: "list",
     name: "addEmpManager",
-    message: "Who is the employee's manager? (USE MANAGER ID - Reference 'Manager ID' table above for ID)",
+    message: "Who is the employee's manager? (Reference 'Manager ID' table above, use 'value' for manager ID)",
     choices: await managerChoices(),
     },
   ])
 
   // Inserts new employee information to employee table
   const newEmployee = await db.promise().query(`INSERT INTO employee (first_name, last_name, role_id, manager_id) VALUES ('${infoEmployee.addFirstName}', '${infoEmployee.addLastName}', '${infoEmployee.addEmpRole}', '${infoEmployee.addEmpManager}')`)
+  
+  // Selects the newly updated table
+  const results = await db.promise().query("SELECT * FROM employee;");
+
+  // Prints the newly updated table
+  console.log("\nNewly Updated Employee Table: ");
+  console.table(results[0]);
+  console.log("\n");
+
+  // Recalls the appMenu so the user can make another new selection
+  appMenu();
+}
+
+
+
+///// SECTION FOR ALL FUNCTIONS FOR UPDATING EMPLOYEE ROLE /////
+
+// Used to retrieve from db all the employees that can updated
+const updateEmployeeList = async () => {
+  const empQuery = await db.promise().query("SELECT id AS value, first_name, last_name, role_id FROM employee;");
+  console.log("\nEMPLOYEE ID REFERENCE TABLE:\n");
+  console.log(empQuery[0]);
+  return empQuery[0];
+}
+
+// Function that is being called from main menu inquirer when "Update Employee" is selected
+const updateEmployee = async () => {
+
+  // Additional Inquirer Prompt to receive user input for new employee's info
+  const infoUpdateEmployee = await inquirer.prompt([
+    { type: "list",
+    name: "updateEmployeeChoice",
+    message: "Which employee do you want to update? (Reference 'EMPLOYEE ID' table above, use 'value' for employee ID)",
+    choices: await updateEmployeeList(),
+    },
+    { type: "list",
+    name: "updateRoleChoice",
+    message: "What is the new role ID for your selected employee? (Reference 'Role ID' table above, use 'value' for role ID)",
+    choices: await roleChoices(),
+    },
+  ])
+
+  // Inserts new employee information to employee table
+  const employeeUpdated = await db.promise().query("UPDATE employee SET role_id=" + 
+  `${infoUpdateEmployee.updateRoleChoice}` + " WHERE id="+`${infoUpdateEmployee.updateEmployeeChoice}` + ";")
   
   // Selects the newly updated table
   const results = await db.promise().query("SELECT * FROM employee;");
@@ -187,7 +242,7 @@ const appMenu = async () => {
     { type: "list",
       name: "appMenu",
       message: "Welcome to Employee Tracker, Please Select an Option: ",
-      choices: ['View All Employees', 'View All Departments', 'View All Roles', 'Add Employee', 'Add Role', 'Add Department', 'Quit' ]
+      choices: ['View All Employees', 'View All Departments', 'View All Roles', 'Add Employee', 'Add Role', 'Add Department', 'Update Employee Role', 'Quit' ]
     }
   ])
 
@@ -210,9 +265,13 @@ const appMenu = async () => {
   else if (results.appMenu === 'Add Department') {
     addDepartment();
   }
+  else if (results.appMenu === 'Update Employee Role') {
+    updateEmployee();
+  }
   else if (results.appMenu === 'Quit') {
     console.log("\n\n\nGoodbye!\n\nYou may now close the terminal or press CTRL+C then Y to exit.");
   }
 }
 
+// Initializes app
 appMenu();
