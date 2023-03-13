@@ -24,7 +24,7 @@ The employee-tracker is an excellent demonstration of MySQL usage. This applicat
 
  Follow installation instructions above. Once the application is started, a list of options for viewing, adding or updating to the database will be presented. For adding or updating to the database, a series of straight-forward questions will be asked of the user. Be sure to reference the printed tables from the database for ID numbers to target specific employees, roles or departments.
 
- [Instructional Demonstration Video]()
+ [Instructional Demonstration Video](https://drive.google.com/file/d/1K2GUHY3NyjCSfHdmVqCT8LYrpAXgp-wp/view)
 
 ## Credits
 
