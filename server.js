@@ -14,63 +14,102 @@ const db = mysql.createConnection(
   console.log(`Connected to the employees_db database.`)
 );
 
+///// View All Employees /////
 const viewEmployees = async () => {
-  const results = await db.promise().query("SELECT * FROM employee;")
+  // Retrieves data from employee table
+  const results = await db.promise().query("SELECT * FROM employee;");
+  // Logs the data in a table format in the console
   console.table(results[0]);
   console.log("\n");
+  // Recalls the main menu
   appMenu();
 }
 
-// const viewDepartments = async () => {
-//   const results = await db.promise().query("SELECT * FROM department;")
-//   console.table(results[0]);
-//   console.log("\n");
-//   appMenu();
-// }
+///// View All Departments /////
+const viewDepartments = async () => {
+  // Retrieves data from department table
+  const results = await db.promise().query("SELECT * FROM department;");
+  // Logs the data in a table format in the console
+  console.table(results[0]);
+  console.log("\n");
+  // Recalls the main menu
+  appMenu();
+}
 
-// const viewRoles = async () => {
-//   const results = await db.promise().query("SELECT * FROM role;")
-//   console.table(results[0]);
-//   console.log("\n");
-//   appMenu();
-// }
+///// View All Roles /////
+const viewRoles = async () => {
+  // Retrieves data from role table
+  const results = await db.promise().query("SELECT * FROM role;");
+  // Logs the data in a table format in the console
+  console.table(results[0]);
+  console.log("\n");
+  // Recalls the main menu
+  appMenu();
+}
 
-// const addEmployee = async () => {
-//   const infoEmployee = await inquirer.prompt([
-//     { type: "input",
-//       name: "addFirstName",
-//       message: "What's the employee's first name?",
-//     },
-//     { type: "input",
-//     name: "addLastName",
-//     message: "What's the employee's last name?",
-//     },
-//     { type: "list",
-//     name: "addEmpRole",
-//     message: "What's the employee's role?",
-//     },
-//     { type: "list",
-//     name: "addEmpManager",
-//     message: "Who is the employee's manager?",
-//     },
-//   ])
+///// SECTION FOR ALL FUNCTIONS FOR ADDING NEW EMPLOYEE /////
 
+// Used to retrieve from db all the roles that can be assigned to a new employee
+const roleChoices = async () => {
+  const roleQuery = await db.promise().query("SELECT id AS value, title FROM role;");
+  console.log("\nROLE ID REFERENCE TABLE:\n");
+  console.log(roleQuery[0]);
+  return roleQuery[0];
+}
 
-//   // Inserts new employee information to employee table
-//   const newEmployee = await db.promise().query(`INSERT INTO employee (first_name, last_name, role_id, manager_id) VALUES (${addFirstName}, ${addLastName}, ${addEmpRole}, ${addEmpManager})`)
+// Used to retrieve from db all the current employees that can be assigned as a manager to the new employee
+const managerChoices = async () => {
+  const managerQuery = await db.promise().query("SELECT id AS value, first_name, last_name FROM employee;");
+  console.log("\nMANAGER ID REFERENCE TABLE:\n")
+  console.log(managerQuery[0]);
+  console.log("\nREFERENCE ROLE ID AND MANAGER ID FROM TABLES ABOVE\n");
+  return managerQuery[0];
+}
+
+const addEmployee = async () => {
+
+  // Additional Inquirer Prompt to receive user input for new employee's info
+  const infoEmployee = await inquirer.prompt([
+    { type: "input",
+      name: "addFirstName",
+      message: "What's the employee's first name?",
+    },
+    { type: "input",
+    name: "addLastName",
+    message: "What's the employee's last name?",
+    },
+    { type: "list",
+    name: "addEmpRole",
+    message: "What is the employee's role ID? (Reference table above for ID)",
+    choices: await roleChoices(),
+    },
+    { type: "list",
+    name: "addEmpManager",
+    message: "Who is the employee's manager? (USE MANAGER ID - Reference table above for ID)",
+    choices: await managerChoices(),
+    },
+  ])
+
+  // Inserts new employee information to employee table
+  const newEmployee = await db.promise().query(`INSERT INTO employee (first_name, last_name, role_id, manager_id) VALUES ('${infoEmployee.addFirstName}', '${infoEmployee.addLastName}', '${infoEmployee.addEmpRole}', '${infoEmployee.addEmpManager}')`)
   
-//   // Selects the newly updated table
-//   const results = await db.promise().query("SELECT * FROM employee;");
+  // Selects the newly updated table
+  const results = await db.promise().query("SELECT * FROM employee;");
 
-//   // Prints the newly updated table
-//   console.table(results[0]);
-//   console.log("\n");
+  // Prints the newly updated table
+  console.table(results[0]);
+  console.log("\n");
 
-//   // Recalls the appMenu so the user can make another or new selection
-//   appMenu();
-// }
+  // Recalls the appMenu so the user can make another new selection
+  appMenu();
+}
 
+
+
+///// Main App Menu /////
 const appMenu = async () => {
+
+  // Inquirer Prompts that present all the choices for viewing the database
   const results = await inquirer.prompt([
     { type: "list",
       name: "appMenu",
@@ -78,6 +117,8 @@ const appMenu = async () => {
       choices: ['View All Employees', 'View All Departments', 'View All Roles', 'Add Employee', 'Add Role', 'Add Department', 'Quit' ]
     }
   ])
+
+  // If + If Else Statements to verify the choices above and calls the respective functions.
   if (results.appMenu === 'View All Employees') {
     viewEmployees();
   }
@@ -87,10 +128,16 @@ const appMenu = async () => {
   else if (results.appMenu === 'View All Roles') {
     viewRoles();
   }
+  else if (results.appMenu === 'Add Employee') {
+    addEmployee();
+  }
+  else if (results.appMenu === 'Add Role') {
+    addRole();
+  }
 
-  // else if (results.appMenu === 'Quit') {
-  //   return quit();
-  // }
+  else if (results.appMenu === 'Quit') {
+    console.log("\n\n\nGoodbye!\n\nYou may now close the terminal or press CTRL+C then Y to exit.");
+  }
 }
 
 appMenu();
