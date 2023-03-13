@@ -47,6 +47,50 @@ const viewRoles = async () => {
   appMenu();
 }
 
+///// SECTION FOR ALL FUNCTIONS FOR ADDING NEW ROLE /////
+
+// Used to retrieve from db all the current employees that can be assigned as a manager to the new employee
+const depChoices = async () => {
+  const depQuery = await db.promise().query("SELECT id AS value, name FROM department;");
+  console.log("\nDEPARTMENT ID REFERENCE TABLE:\n")
+  console.log(depQuery[0]);
+  console.log("\nREFERENCE DEPARTMENT ID FROM TABLES ABOVE\n");
+  return depQuery[0];
+}
+
+const addRole = async () => {
+
+  // Additional Inquirer Prompt to receive user input for new employee's info
+  const infoRole = await inquirer.prompt([
+    { type: "input",
+      name: "addRoleName",
+      message: "What is the title of the new role?",
+    },
+    { type: "input",
+    name: "addRoleSalary",
+    message: "What is the salary of the new role?",
+    },
+    { type: "list",
+    name: "addRoleDep",
+    message: "Which department does the new role belong to?",
+    choices: await depChoices(),
+    },
+  ])
+
+  // Inserts new employee information to employee table
+  const newRole = await db.promise().query(`INSERT INTO role (title, salary, department_id) VALUES ('${infoRole.addRoleName}', '${infoRole.addRoleSalary}', '${infoRole.addRoleDep}')`)
+  
+  // Selects the newly updated table
+  const results = await db.promise().query("SELECT * FROM role;");
+
+  // Prints the newly updated table
+  console.table(results[0]);
+  console.log("\n");
+
+  // Recalls the appMenu so the user can make another new selection
+  appMenu();
+}
+
 ///// SECTION FOR ALL FUNCTIONS FOR ADDING NEW EMPLOYEE /////
 
 // Used to retrieve from db all the roles that can be assigned to a new employee
